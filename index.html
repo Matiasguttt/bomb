@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://aframe.io"></script>
+</head>
+<body>
+  <a-scene>
+    <a-plane rotation="-90 0 0" width="20" height="20" color="blue"></a-plane>
+    
+    <a-camera>
+      <a-cursor fuse="true" fuse-timeout="1000" color="black"></a-cursor>
+    </a-camera>
+
+    <!-- More green boxes added -->
+    <a-box id="safe1" position="-2 1 -4" color="#00FF55"></a-box>
+    <a-box id="safe2" position="2 1.5 -5" color="#00FF55"></a-box>
+    <a-box id="safe3" position="-1 2 -6" color="#00FF55"></a-box>
+    <a-box id="safe4" position="1 0.8 -3" color="#00FF55"></a-box>
+    
+    <a-sphere id="bomb" position="0 1.2 -3" color="#FF0000" radius="0.3"></a-sphere>
+  </a-scene>
+
+  <script>
+    const scene = document.querySelector('a-scene');
+    const safe1 = document.querySelector('#safe1');
+    const safe2 = document.querySelector('#safe2');
+    const safe3 = document.querySelector('#safe3');
+    const safe4 = document.querySelector('#safe4');
+    const bomb = document.querySelector('#bomb');
+    
+    const rand = (min, max) => min + Math.random() * (max - min); 
+    const randCoords = () => `${rand(-4, 4)} ${rand(0.5, 3)} ${rand(-8, -2)}`;
+
+    function moveObject(element) {
+      element.setAttribute('animation', {
+        property: 'position',
+        to: randCoords(),
+        dur: 2000,
+        easing: 'easeInOutQuad'
+      });
+    }
+
+    // Teleport green boxes instantly when clicked/stared at
+    safe1.addEventListener('click', () => safe1.setAttribute('position', randCoords()));
+    safe2.addEventListener('click', () => safe2.setAttribute('position', randCoords()));
+    safe3.addEventListener('click', () => safe3.setAttribute('position', randCoords()));
+    safe4.addEventListener('click', () => safe4.setAttribute('position', randCoords()));
+
+    // Game over: remove animations to stop movement on all moving items
+    bomb.addEventListener('click', () => {
+      bomb.removeAttribute('animation');
+      safe2.removeAttribute('animation');
+      safe3.removeAttribute('animation');
+      safe4.removeAttribute('animation');
+    });
+
+    // Continue the movement loop when current animation completes
+    bomb.addEventListener('animationcomplete', () => moveObject(bomb));
+    safe2.addEventListener('animationcomplete', () => moveObject(safe2));
+    safe3.addEventListener('animationcomplete', () => moveObject(safe3));
+    safe4.addEventListener('animationcomplete', () => moveObject(safe4));
+
+    // Start movement loops once the scene is ready
+    if (scene.hasLoaded) {
+      moveObject(bomb);
+      moveObject(safe2);
+      moveObject(safe3);
+      moveObject(safe4);
+    } else {
+      scene.addEventListener('loaded', () => {
+        moveObject(bomb);
+        moveObject(safe2);
+        moveObject(safe3);
+        moveObject(safe4);
+      });
+    }
+  </script>
+</body>
+</html>
